@@ -25,5 +25,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
+        id: run_tests
         run: |
-          pytest || echo "Tests failed"
+          python -m pytest
+
+      - name: Analyze failure (self-healing)
+        if: failure() && steps.run_tests.outcome == 'failure'
+        run: |
+          echo "Running self-healing analysis..."
+          python -m pytest || true 2>&1 | python analyze_failure.py
